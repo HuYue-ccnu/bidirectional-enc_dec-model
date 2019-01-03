@@ -183,7 +183,6 @@ class Seq2Seq(object):
         self.beam_search = tf.placeholder(tf.bool,name="beam_search")
         self.batch_size = tf.placeholder(tf.int32,[],name="batch_size")
         self.keep_prob_placeholder = tf.placeholder(tf.float32,name="keep_prob_placeholder")
-        self.lr = tf.placeholder(tf.float32,[],name="learning_rate")
         self.max_target_sequence_length = tf.reduce_max(self.decoder_length,name="max_target_sequence_length")
         self.mask = tf.sequence_mask(self.decoder_length,self.max_target_sequence_length,dtype=tf.float32,name="mask")
         '''==================================2. encoder'''
@@ -199,14 +198,13 @@ class Seq2Seq(object):
         '''=======================4. save model'''
         self.saver = tf.train.Saver(tf.global_variables())
         self.saver_best = tf.train.Saver(tf.global_variables(),max_to_keep=3)
-    def train(self,sess,x,learning_rate,keep_prob_placeholder_train):
+    def train(self,sess,x,keep_prob_placeholder_train):
         feed_dict = {self.encoder_inputs:x['enc_in'],
                      self.encoder_length:x['enc_len'],
                      self.decoder_inputs:x['dec_in'],
                      self.decoder_length:x['dec_len'],
                      self.beam_search:False,
                      self.keep_prob_placeholder:0.5,
-                     self.lr:learning_rate,
                      self.batch_size:len(x['enc_in'])}
         _,loss,summary = sess.run([self.train_op,self.loss,self.summary_op],feed_dict=feed_dict)
         return loss,summary
